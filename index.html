@@ -1,0 +1,57 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Protected Page</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    .hidden-field { position:absolute; left:-9999px; }
+    .decoy-link { display:none; }
+  </style>
+</head>
+<body>
+  <form action="/verify" method="POST" id="verifyForm">
+    <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="light" data-size="invisible"></div>
+    <input type="text" name="nickname" class="hidden-field" autocomplete="off"> <!-- Honeypot -->
+
+    <!-- Stealth traps -->
+    <input type="text" name="email" value="should_be_empty" style="display:none">
+    <input type="checkbox" name="subscribe" checked style="display:none">
+	<input type="text" name="username" value="trap" style="display:none;">
+    <input type="checkbox" name="subscribe" checked style="display:none;">
+
+
+    <a class="decoy-link" href="https://redirect-404.com/trap1">Click Here</a>
+    <a class="decoy-link" href="https://redirect-404.com/trap2">Hidden Link</a>
+
+    <button type="submit" id="sub" style="display:none">Submit</button>
+  </form>
+
+  <script>
+    (function() {
+      const suspicious = [];
+
+      if (navigator.webdriver) suspicious.push('webdriver');
+      if (screen.width < 800 || screen.height < 600) suspicious.push('low-res');
+      if (navigator.plugins.length === 0) suspicious.push('no-plugins');
+      if (!navigator.language || navigator.languages.length === 0) suspicious.push('no-lang');
+      if (!('ontouchstart' in window) && navigator.maxTouchPoints === 0) suspicious.push('no-touch');
+
+      const ua = navigator.userAgent.toLowerCase();
+      if (/bot|crawl|spider|slurp|fetch|scanner|harvest|httpclient|python|libwww|curl|wget|scrapy|axios|guzzle|phantomjs|headless|selenium|puppeteer|playwright|mechanize|urllib|cfnetwork|masscan|googlebot|bingbot|yandex|baiduspider|duckduckbot|semrush|mj12bot|ahrefsbot|facebookexternalhit|facebot|twitterbot|discordbot/.test(ua)) {
+        suspicious.push('ua-bot');
+      }
+
+      if (suspicious.length > 2) {
+        window.location.href = "https://redirect-404.com";
+      } else {
+        setTimeout(() => {
+          document.getElementById('sub').click();
+        }, 1000);
+      }
+    })();
+  </script>
+</body>
+</html>
